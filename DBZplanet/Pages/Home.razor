@@ -1,0 +1,108 @@
+﻿@page "/"
+@using BlazzorDBZ.models
+@inject HttpClient Http
+
+<PageTitle>Planeta</PageTitle>
+
+<h1>Planeta</h1>
+
+<div class="form-group">
+    <label for="id-input">
+        <input type="number" class="form-control" id="idInput" @bind="idPlaneta"
+            placeholder="Digite o ID do planeta:" />
+    </label>
+</div>
+
+<button class="btn btn-primary mt-2" @onclick="Consultarplaneta">
+    Buscar Planeta
+</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@if (planeta != null)
+{
+    <h3>
+        Resultado da API:
+    </h3>
+
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td><strong>
+                        Nome:
+                    </strong>
+                </td>
+                <td>
+                    @planeta.name
+                </td>
+            </tr>
+
+            <tr>
+                <td><strong>
+                        Imagem:
+                    </strong>
+                </td>
+                <td>
+                    <img src="@planeta.image" alt="@planeta.name" width="200" />
+                </td>
+            </tr>
+
+            <tr>
+                <td><strong>
+                        Status:
+                    </strong>
+                </td>
+                <td>
+                    @planeta.isDestroyed
+                </td>
+            </tr>
+
+            <tr>
+                <td><strong>
+                        Descrição:
+                    </strong>
+                </td>
+                <td>
+                    @planeta.description
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+}
+
+@code {
+    private int idPlaneta;
+    private Planeta planeta;
+    private string errorMessage;
+
+    private async Task Consultarplaneta()
+    {
+        errorMessage = string.Empty;
+        planeta = null;
+
+        if (idPlaneta <= 0)
+        {
+            errorMessage = "Por favor, digite um ID válido.";
+            return;
+        }
+
+        try
+        {
+            string url = $"https://dragonball-api.com/api/planets/{idPlaneta}";
+            planeta = await Http.GetFromJsonAsync<Planeta>(url);
+
+            if (planeta == null)
+            {
+                errorMessage = "planeta não encontrado.";
+            }
+        }
+        catch (Exception e)
+        {
+            errorMessage = $"Erro ao conectar na API: {e.Message}";
+        }
+    }
+}
